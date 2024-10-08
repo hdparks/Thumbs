@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://chpe1hc0kjvjo"]
+
+[ext_resource type="Script" path="res://scenes/Game.gd" id="1_mor7y"]
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1_mor7y")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/Player.tscn")
+spawn_path = NodePath("../Players")
+spawn_limit = 2
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(1, -5.20008e-16, 3.03868e-16, 3.03868e-16, 0.871214, 0.490904, -5.20008e-16, -0.490904, 0.871214, 2.08165e-12, 2.22, 2)
+light_energy = 8.31
+spot_range = 30.026

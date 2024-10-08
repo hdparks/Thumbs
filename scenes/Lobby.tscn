@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://djamax3xvm43l"]
+
+[ext_resource type="Script" path="res://scripts/Lobby.gd" id="1_u03gh"]
+
+[node name="Lobby" type="Node"]
+script = ExtResource("1_u03gh")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="RefreshMatchList" type="Button" parent="UI"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 8.0
+text = "Refresh"
+
+[node name="HostMatch" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 1.0
+offset_right = 140.0
+offset_bottom = 32.0
+text = "Host"
+
+[node name="Matches" type="ItemList" parent="UI"]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 478.0
+offset_bottom = 378.0
+
+[node name="Start" type="Button" parent="UI"]
+layout_mode = 0
+offset_left = 142.0
+offset_top = 1.0
+offset_right = 217.0
+offset_bottom = 32.0
+text = "Start
+"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/Game.tscn")
+spawn_path = NodePath("../Game")
+
+[node name="Game" type="Node" parent="."]
+
+[connection signal="pressed" from="UI/RefreshMatchList" to="." method="_on_refresh_match_list_pressed"]
+[connection signal="pressed" from="UI/HostMatch" to="." method="_on_host_match_pressed"]
+[connection signal="item_selected" from="UI/Matches" to="." method="_on_matches_item_selected"]
+[connection signal="pressed" from="UI/Start" to="." method="_on_start_pressed"]
