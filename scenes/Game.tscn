@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://chpe1hc0kjvjo"]
+[gd_scene load_steps=3 format=3 uid="uid://chpe1hc0kjvjo"]
 
-[ext_resource type="Script" path="res://scenes/Game.gd" id="1_mor7y"]
+[ext_resource type="Script" path="res://scripts/Game.gd" id="1_mor7y"]
+[ext_resource type="Script" path="res://addons/netfox/state-synchronizer.gd" id="2_by7ch"]
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_mor7y")
@@ -16,3 +17,25 @@ spawn_limit = 2
 transform = Transform3D(1, -5.20008e-16, 3.03868e-16, 3.03868e-16, 0.871214, 0.490904, -5.20008e-16, -0.490904, 0.871214, 2.08165e-12, 2.22, 2)
 light_energy = 8.31
 spot_range = 30.026
+
+[node name="StateSynchronizer" type="Node" parent="." node_paths=PackedStringArray("root")]
+script = ExtResource("2_by7ch")
+root = NodePath("..")
+properties = Array[String](["UI/Player1State:text", "UI/Player2State:text"])
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Player1State" type="Label" parent="UI"]
+layout_mode = 0
+offset_right = 450.0
+offset_bottom = 86.0
+
+[node name="Player2State" type="Label" parent="UI"]
+layout_mode = 0
+offset_top = 61.0
+offset_right = 442.0
+offset_bottom = 133.0

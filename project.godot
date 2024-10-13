@@ -17,7 +17,28 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Nakama="*res://nakama-godot-29ff7373ac01cc8da5e54f2c4a9be20f8d68beca/addons/com.heroiclabs.nakama/Nakama.gd"
+Nakama="*res://addons/nakama-godot-29ff7373ac01cc8da5e54f2c4a9be20f8d68beca/addons/com.heroiclabs.nakama/Nakama.gd"
+NetworkTime="*res://addons/netfox/network-time.gd"
+NetworkTimeSynchronizer="*res://addons/netfox/network-time-synchronizer.gd"
+NetworkRollback="*res://addons/netfox/rollback/network-rollback.gd"
+NetworkEvents="*res://addons/netfox/network-events.gd"
+NetworkPerformance="*res://addons/netfox/network-performance.gd"
+PlayerState="*res://scripts/PlayerState.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/netfox.internals/plugin.cfg", "res://addons/netfox/plugin.cfg")
+
+[input]
+
+Drag={
+"deadzone": 0.0,
+"events": []
+}
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
