@@ -1,0 +1,10 @@
+[build]
+  builder = "heroku/buildpacks:20"
+
+[build.env]
+  NPM_CONFIG_PRODUCTION = "false"
+
+[run]
+  command = "npm run dev"
+  [[ports]]
+    host_bind_mode = "http"
