@@ -35,13 +35,22 @@ export function Game({
 }) {
   const [gameState, setGameState] = useState(initialState);
   const [myEscapeTaps, setMyEscapeTaps] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(false);
   const tickIntervalRef = useRef(null);
+  const autoPlayIntervalRef = useRef(null);
   const escapeTapsRef = useRef(0);
+  const autoPlayTouchingRef = useRef(false);
+  const gameStateRef = useRef(gameState);
 
   const syncState = useCallback((newState) => {
     setGameState(newState);
+    gameStateRef.current = newState;
     onStateChange(newState);
   }, [onStateChange]);
+
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   const attemptEscape = useCallback((tapCount) => {
     const currentState = gameState;
@@ -98,7 +107,21 @@ export function Game({
       };
     }
 
-    if (p1Touching && p2Touching) {
+    if (p1Touching && !p2Touching && !p1Pinned && !p2Pinned) {
+      newState.p2 = { ...newState.p2, isPinned: true, isTouching: false };
+      newState.p2.escapeTaps = 0;
+      escapeTapsRef.current = 0;
+      setMyEscapeTaps(0);
+    }
+
+    if (p2Touching && !p1Touching && !p1Pinned && !p2Pinned) {
+      newState.p1 = { ...newState.p1, isPinned: true, isTouching: false };
+      newState.p1.escapeTaps = 0;
+      escapeTapsRef.current = 0;
+      setMyEscapeTaps(0);
+    }
+
+    if (p1Touching && p2Touching && !p1Pinned && !p2Pinned) {
       const laterP1 = p2Pinned && !p1Pinned;
       const laterP2 = p1Pinned && !p2Pinned;
       
@@ -157,6 +180,41 @@ export function Game({
       setGameState(peerState);
     }
   }, [peerState, localPlayer]);
+
+  useEffect(() => {
+    const currentGameState = gameStateRef.current;
+    if (!autoPlay || currentGameState.gameState !== 'playing') {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+      return;
+    }
+
+    autoPlayIntervalRef.current = setInterval(() => {
+      const gs = gameStateRef.current;
+      autoPlayTouchingRef.current = !autoPlayTouchingRef.current;
+      const key = localPlayer;
+      const newState = {
+        ...gs,
+        [key]: {
+          ...gs[key],
+          isTouching: autoPlayTouchingRef.current,
+        },
+      };
+      if (!autoPlayTouchingRef.current && gs[key].isPinned) {
+        escapeTapsRef.current = 0;
+        setMyEscapeTaps(0);
+      }
+      syncState(newState);
+    }, 1000);
+
+    return () => {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+    };
+  }, [autoPlay, localPlayer, syncState]);
 
   useEffect(() => {
     if (gameState.gameState === 'playing') {
@@ -249,6 +307,35 @@ export function Game({
             START GAME
           </button>
         )}
+        <button
+          onClick={() => setAutoPlay(!autoPlay)}
+          className={`px-4 py-2 rounded font-bold text-sm ${
+            autoPlay 
+              ? 'bg-yellow-500 text-black' 
+              : 'bg-gray-600 text-white'
+          }`}
+        >
+          🤖 Auto Play: {autoPlay ? 'ON' : 'OFF'}
+        </button>
+
+        <div className="flex gap-8">
+          <div className="flex items-center gap-2">
+            <div className={`w-4 h-4 rounded-full transition-all ${
+              gameState.p1.isTouching 
+                ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.8)] scale-110' 
+                : 'bg-gray-700'
+            }`} />
+            <span className="text-white text-sm">P1 {gameState.p1.isTouching ? 'Touching' : ''}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className={`w-4 h-4 rounded-full transition-all ${
+              gameState.p2.isTouching 
+                ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.8)] scale-110' 
+                : 'bg-gray-700'
+            }`} />
+            <span className="text-white text-sm">P2 {gameState.p2.isTouching ? 'Touching' : ''}</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -271,6 +358,25 @@ export function Game({
         <div className="flex gap-8 justify-center text-white">
           <span className="text-xl">P1 Wins: {gameState.p1.wins}</span>
           <span className="text-xl">P2 Wins: {gameState.p2.wins}</span>
+        </div>
+      </div>
+
+      <div className="flex gap-8">
+        <div className="flex items-center gap-2">
+          <div className={`w-4 h-4 rounded-full transition-all ${
+            gameState.p1.isTouching 
+              ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.8)] scale-110' 
+              : 'bg-gray-700'
+          }`} />
+          <span className="text-white text-sm">P1 {gameState.p1.isTouching ? 'Touching' : ''}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className={`w-4 h-4 rounded-full transition-all ${
+            gameState.p2.isTouching 
+              ? 'bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.8)] scale-110' 
+              : 'bg-gray-700'
+          }`} />
+          <span className="text-white text-sm">P2 {gameState.p2.isTouching ? 'Touching' : ''}</span>
         </div>
       </div>
 
@@ -317,7 +423,13 @@ export function Game({
       {localPlayer !== 'p1' && opponentState && (
         <div className="opacity-50">
           <p className="text-white text-center mb-2">Opponent (P1)</p>
-          <div className="w-32 h-32 rounded-full bg-gray-600 flex items-center justify-center">
+          <div className={`w-32 h-32 rounded-full flex items-center justify-center transition-all ${
+            opponentState.isTouching 
+              ? 'bg-green-600 shadow-[0_0_30px_rgba(34,197,94,0.6)]' 
+              : opponentState.isPinned
+                ? 'bg-red-600 shadow-[0_0_30px_rgba(220,38,38,0.6)]'
+                : 'bg-gray-600'
+          }`}>
             <span className="text-white text-sm">
               {opponentState.isTouching ? 'TOUCHING' : opponentState.isPinned ? 'PINNED!' : 'Waiting'}
             </span>
@@ -328,7 +440,13 @@ export function Game({
       {localPlayer !== 'p2' && opponentState && (
         <div className="opacity-50">
           <p className="text-white text-center mb-2">Opponent (P2)</p>
-          <div className="w-32 h-32 rounded-full bg-gray-600 flex items-center justify-center">
+          <div className={`w-32 h-32 rounded-full flex items-center justify-center transition-all ${
+            gameState.p2.isTouching 
+              ? 'bg-green-600 shadow-[0_0_30px_rgba(34,197,94,0.6)]' 
+              : gameState.p2.isPinned
+                ? 'bg-red-600 shadow-[0_0_30px_rgba(220,38,38,0.6)]'
+                : 'bg-gray-600'
+          }`}>
             <span className="text-white text-sm">
               {gameState.p2.isTouching ? 'TOUCHING' : gameState.p2.isPinned ? 'PINNED!' : 'Waiting'}
             </span>
@@ -344,6 +462,16 @@ export function Game({
           PLAY AGAIN
         </button>
       )}
+      <button
+        onClick={() => setAutoPlay(!autoPlay)}
+        className={`px-4 py-2 rounded font-bold text-sm ${
+          autoPlay 
+            ? 'bg-yellow-500 text-black' 
+            : 'bg-gray-600 text-white'
+        }`}
+      >
+        🤖 Auto Play: {autoPlay ? 'ON' : 'OFF'}
+      </button>
     </div>
   );
 }
