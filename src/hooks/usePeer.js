@@ -6,6 +6,7 @@ export function usePeer(roomId) {
   const [remotePeerId, setRemotePeerId] = useState(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
+  const [lastMessage, setLastMessage] = useState(null);
   
   const isHost = !roomId;
   const peerRef = useRef(null);
@@ -45,6 +46,7 @@ export function usePeer(roomId) {
 
       conn.on('data', (data) => {
         console.log('[PeerJS] Data:', data);
+        setLastMessage(data);
         if (dataCallbackRef.current) {
           dataCallbackRef.current(data);
         }
@@ -83,6 +85,7 @@ export function usePeer(roomId) {
 
     conn.on('data', (data) => {
       console.log('[PeerJS] Data:', data);
+      setLastMessage(data);
       if (dataCallbackRef.current) {
         dataCallbackRef.current(data);
       }
@@ -131,5 +134,6 @@ export function usePeer(roomId) {
     isHost,
     sendData,
     onData,
+    lastMessage,
   };
 }
