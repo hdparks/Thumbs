@@ -210,9 +210,9 @@ function createGameEngine() {
     state = JSON.parse(JSON.stringify(newState));
   }
 
-  function update(localInput, remoteInput) {
-    currentInput.p1 = localInput || createInput(false, 0);
-    currentInput.p2 = remoteInput || createInput(false, 0);
+  function update(p1Input, p2Input) {
+    currentInput.p1 = p1Input || createInput(false, 0);
+    currentInput.p2 = p2Input || createInput(false, 0);
 
     state = updatePhysics(state, currentInput.p1, currentInput.p2);
     return state;
