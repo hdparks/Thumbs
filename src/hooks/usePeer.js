@@ -13,8 +13,6 @@ export function usePeer(roomId) {
   const dataCallbackRef = useRef(null);
   const connRef = useRef(null);
 
-  console.log('[usePeer] roomId:', roomId, 'isHost:', isHost);
-
   useEffect(() => {
     const peer = new Peer(undefined, {
       debug: 2,
@@ -22,30 +20,24 @@ export function usePeer(roomId) {
     peerRef.current = peer;
 
     peer.on('open', (id) => {
-      console.log('[PeerJS] Open with ID:', id);
       setPeerId(id);
     });
 
     peer.on('error', (err) => {
-      console.error('[PeerJS] Error:', err);
       setError(err.message);
     });
 
     peer.on('disconnected', () => {
-      console.log('[PeerJS] Disconnected');
     });
 
     peer.on('connection', (conn) => {
-      console.log('[PeerJS] Incoming connection from:', conn.peer);
       setRemotePeerId(conn.peer);
       
       conn.on('open', () => {
-        console.log('[PeerJS] Connection opened');
         setConnected(true);
       });
 
       conn.on('data', (data) => {
-        console.log('[PeerJS] Data:', data);
         setLastMessage(data);
         if (dataCallbackRef.current) {
           dataCallbackRef.current(data);
@@ -53,12 +45,10 @@ export function usePeer(roomId) {
       });
 
       conn.on('close', () => {
-        console.log('[PeerJS] Connection closed');
         setConnected(false);
       });
 
       conn.on('error', (err) => {
-        console.error('[PeerJS] Connection error:', err);
         setError(err.message);
       });
     });
@@ -72,19 +62,15 @@ export function usePeer(roomId) {
   useEffect(() => {
     if (!peerId || !roomId || isHost) return;
 
-    console.log('[client] Connecting to host:', roomId);
-    
     const conn = peerRef.current.connect(roomId);
     connRef.current = conn;
     setRemotePeerId(roomId);
 
     conn.on('open', () => {
-      console.log('[PeerJS] Connection opened');
       setConnected(true);
     });
 
     conn.on('data', (data) => {
-      console.log('[PeerJS] Data:', data);
       setLastMessage(data);
       if (dataCallbackRef.current) {
         dataCallbackRef.current(data);
@@ -92,12 +78,10 @@ export function usePeer(roomId) {
     });
 
     conn.on('close', () => {
-      console.log('[PeerJS] Connection closed');
       setConnected(false);
     });
 
     conn.on('error', (err) => {
-      console.error('[PeerJS] Connection error:', err);
       setError(err.message);
     });
   }, [peerId, roomId, isHost]);

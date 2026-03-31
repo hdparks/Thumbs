@@ -9,7 +9,6 @@ export function Connection({
   const [copied, setCopied] = useState(false);
   
   const roomUrl = `${window.location.origin}${window.location.pathname}?room=${peerId}`;
-  console.log('[Connection] Generating URL with peerId:', peerId, 'url:', roomUrl);
   
   const copyUrl = async () => {
     await navigator.clipboard.writeText(roomUrl);

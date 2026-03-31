@@ -25,7 +25,6 @@ function createRollbackManager(gameEngine) {
   function loadState(frame) {
     const serialized = stateBuffer.get(frame);
     if (!serialized) {
-      console.warn(`No saved state for frame ${frame}, using oldest available`);
       const oldestFrame = Math.min(...stateBuffer.keys());
       return loadState(oldestFrame);
     }
@@ -66,7 +65,6 @@ function createRollbackManager(gameEngine) {
 
       const savedState = getSavedState(remoteFrame - 1);
       if (!savedState) {
-        console.error('Cannot rollback - no saved state');
         return false;
       }
 
